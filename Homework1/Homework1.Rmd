@@ -1,0 +1,20 @@
+---
+title: "Homework 1 - PSTAT131"
+author: "Kabir Snell 1161304"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    code_folding: show
+---
+
+### Question 1
+
+Supervised learning is a form of machine learning that specifically maps each input to an output. It does this in order to estimate how predictors affect the response variable. In supervised learning we find the "best" model for the response given predictors and assess the quality of our predictions and estimations
+
+Unsupervised learning is a form of machine learning that trains on data where the inputs and outputs are not mapped. There is no response variable, instead just the predictors. Unsupervised machine learning depends on finding clusters and recognizing patterns in the data sets.
+
+The difference between the two forms of machine learning is; with supervised machine learning, the model is trained on labled data sets (each response variable is mapped to specific predictors), while unsupervised machine learning learns by pattern recognition on unlabled data sets.
+
+
+### Question 2
