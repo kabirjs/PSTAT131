@@ -1,6 +1,6 @@
 ---
 title: "Lab 1"
-author: "PSTAT 131/231 - Kabir Snell"
+author: "PSTAT 131/231 - Kabir"
 output:
   html_document:
     toc: true
