@@ -6,15 +6,98 @@ output:
     toc: true
     toc_float: true
     code_folding: show
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
+
+## Machine Learning Main Ideas
 
 ### Question 1
 
-Supervised learning is a form of machine learning that specifically maps each input to an output. It does this in order to estimate how predictors affect the response variable. In supervised learning we find the "best" model for the response given predictors and assess the quality of our predictions and estimations
+**Supervised Learning:** For each observation of the predictor
+measurements(s), there is an associated response measurement. In
+supervised learning, we wish to fit a model that relates the response to
+the predictors, with the aim of accurately predicting the response for
+future observations (prediction) or better understanding the
+relationship between the response and the predictors (inference).
 
-Unsupervised learning is a form of machine learning that trains on data where the inputs and outputs are not mapped. There is no response variable, instead just the predictors. Unsupervised machine learning depends on finding clusters and recognizing patterns in the data sets.
+**Unsupervised learning:** For each observation, we observe a vector of
+measurements but no associated response. It is not possible to fit a
+model (ex. regression) since there is no response variable to predict.
+In unsupervised learning we can seek to understand the relationships
+between the variables or between the observations.
 
-The difference between the two forms of machine learning is; with supervised machine learning, the model is trained on labled data sets (each response variable is mapped to specific predictors), while unsupervised machine learning learns by pattern recognition on unlabled data sets.
+(Definitions loosely cited from "An introduction to statistical
+learning" Textbook)
 
+The key difference between unsupervised and supervised machine learning
+is the response variable. In supervised learning, the model trains on
+all of the past response variables in order to predict future
+observations. This is in stark contrast to unsupervised machine learning
+where there is no response variable to train on. Instead (to the best of
+my knowledge), unsupervised machine learning seeks to find clusters in
+the data to draw inferences about future predictors.
 
 ### Question 2
+
+The difference between regression models and classification models is
+the type of response variable. Generally, we refer to a problem with a
+quantitative response as a regression problem, and that with a
+qualitative response as a classification problem. There are some
+exceptions to this rule however; as logistic regression is typically
+used with a qualitative response.
+
+("An Introduction to Statistical Learning" Textbook)
+
+### Question 3
+
+**Regression:**
+
+One commonly used metric for regression in ML problems is mean squared
+error (MSE). MSE will be small if the predicted responded are very close
+to the true responses, and will be large if for some of the
+observations, the predicted and true responses differ substantially.
+
+Another commonly used metric for regression in ML is the t-statistic for
+coefficients of regression. The t-statistic help us calculate a p-value
+that will determine how confident the model is in the result of the
+coefficient value. Although this does not matter AS much in prediction
+models, it is still an important metric for other applications of ML and
+regression.
+
+**Classification:**
+
+The most common approach for quantifying the accuracy of classification
+models is error rate, which is the proportion of mistakes hat are made
+if we apply our estimate to the training observations. ("An Introduction
+to Statistical Learning" Textbook)
+
+The Bayes error rate is another metric used to assess the quality of
+classification machine learning models. It is defined as the lowest
+possible error rate for any classifier of a random outcome. (Wikipedia)
+
+### Question 4
+
+**Descriptive models:** Descriptive models are similar to inferential models, with the
+key difference being that descriptive models often aim to summarize a sample, rather
+than using the data to learn about the population in which the sample came from.
+Descriptive models use various statistical techniques to find patterns in a sample, and
+generally not used to infer anything past what is presented in the sample. (Wikipedia)
+
+**Inferential models:** For inferential models, we seek to understand
+the association between the response and the predictors. In this model,
+we are still seeking to estimate the response but our goal is not
+necessarily to make predictions for future responses. Inferential models
+help us understand the connection between responses and the associated
+predictors, which can help us answer questions such as: *Which
+predictors are associated with the response?*, and *What is the
+relationship between the response and each predictor?* ("An Introduction
+to Statistical Learning" Textbook)
+
+**Predictive models:** For predictive models in machine learning, the
+aim of the model is to accurately forecast future responses for a set of
+predictors. Practically, there are many situations where a set of inputs
+are readily available, but the output cannot be obtained, and thus needs
+to be predicted. The aim of this model is to have the lowest coefficient
+of determination, while maintaining accurate forecasts.
