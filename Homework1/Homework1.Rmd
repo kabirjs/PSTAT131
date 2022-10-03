@@ -15,38 +15,17 @@ editor_options:
 
 ### Question 1
 
-**Supervised Learning:** For each observation of the predictor
-measurements(s), there is an associated response measurement. In
-supervised learning, we wish to fit a model that relates the response to
-the predictors, with the aim of accurately predicting the response for
-future observations (prediction) or better understanding the
-relationship between the response and the predictors (inference).
+**Supervised Learning:** For each observation of the predictor measurements(s), there is an associated response measurement. In supervised learning, we wish to fit a model that relates the response to the predictors, with the aim of accurately predicting the response for future observations (prediction) or better understanding the relationship between the response and the predictors (inference).
 
-**Unsupervised learning:** For each observation, we observe a vector of
-measurements but no associated response. It is not possible to fit a
-model (ex. regression) since there is no response variable to predict.
-In unsupervised learning we can seek to understand the relationships
-between the variables or between the observations.
+**Unsupervised learning:** For each observation, we observe a vector of measurements but no associated response. It is not possible to fit a model (ex. regression) since there is no response variable to predict. In unsupervised learning we can seek to understand the relationships between the variables or between the observations.
 
-(Definitions loosely cited from "An introduction to statistical
-learning" Textbook)
+(Definitions loosely cited from "An introduction to statistical learning" Textbook)
 
-The key difference between unsupervised and supervised machine learning
-is the response variable. In supervised learning, the model trains on
-all of the past response variables in order to predict future
-observations. This is in stark contrast to unsupervised machine learning
-where there is no response variable to train on. Instead (to the best of
-my knowledge), unsupervised machine learning seeks to find clusters in
-the data to draw inferences about future predictors.
+The key difference between unsupervised and supervised machine learning is the response variable. In supervised learning, the model trains on all of the past response variables in order to predict future observations. This is in stark contrast to unsupervised machine learning where there is no response variable to train on. Instead (to the best of my knowledge), unsupervised machine learning seeks to find clusters in the data to draw inferences about future predictors.
 
 ### Question 2
 
-The difference between regression models and classification models is
-the type of response variable. Generally, we refer to a problem with a
-quantitative response as a regression problem, and that with a
-qualitative response as a classification problem. There are some
-exceptions to this rule however; as logistic regression is typically
-used with a qualitative response.
+The difference between regression models and classification models is the type of response variable. Generally, we refer to a problem with a quantitative response as a regression problem, and that with a qualitative response as a classification problem. There are some exceptions to this rule however; as logistic regression is typically used with a qualitative response.
 
 ("An Introduction to Statistical Learning" Textbook)
 
@@ -54,72 +33,114 @@ used with a qualitative response.
 
 **Regression:**
 
-One commonly used metric for regression in ML problems is mean squared
-error (MSE). MSE will be small if the predicted responded are very close
-to the true responses, and will be large if for some of the
-observations, the predicted and true responses differ substantially.
+One commonly used metric for regression in ML problems is mean squared error (MSE). MSE will be small if the predicted responded are very close to the true responses, and will be large if for some of the observations, the predicted and true responses differ substantially.
 
-Another commonly used metric for regression in ML is the t-statistic for
-coefficients of regression. The t-statistic help us calculate a p-value
-that will determine how confident the model is in the result of the
-coefficient value. Although this does not matter AS much in prediction
-models, it is still an important metric for other applications of ML and
-regression.
+Another commonly used metric for regression in ML is the t-statistic for coefficients of regression. The t-statistic help us calculate a p-value that will determine how confident the model is in the result of the coefficient value. Although this does not matter AS much in prediction models, it is still an important metric for other applications of ML and regression.
 
 **Classification:**
 
-The most common approach for quantifying the accuracy of classification
-models is error rate, which is the proportion of mistakes hat are made
-if we apply our estimate to the training observations. ("An Introduction
-to Statistical Learning" Textbook)
+The most common approach for quantifying the accuracy of classification models is error rate, which is the proportion of mistakes hat are made if we apply our estimate to the training observations. ("An Introduction to Statistical Learning" Textbook)
 
-The Bayes error rate is another metric used to assess the quality of
-classification machine learning models. It is defined as the lowest
-possible error rate for any classifier of a random outcome. (Wikipedia)
+The Bayes error rate is another metric used to assess the quality of classification machine learning models. It is defined as the lowest possible error rate for any classifier of a random outcome. (Wikipedia)
 
 ### Question 4
 
-**Descriptive models:** Descriptive models are similar to inferential models, with the
-key difference being that descriptive models often aim to summarize a sample, rather
-than using the data to learn about the population in which the sample came from.
-Descriptive models use various statistical techniques to find patterns in a sample, and
-generally not used to infer anything past what is presented in the sample. (Wikipedia)
+**Descriptive models:** Descriptive models are similar to inferential models, with the key difference being that descriptive models often aim to summarize a sample, rather than using the data to learn about the population in which the sample came from. Descriptive models use various statistical techniques to find patterns in a sample, and generally not used to infer anything past what is presented in the sample. (Wikipedia)
 
-**Inferential models:** For inferential models, we seek to understand
-the association between the response and the predictors. In this model,
-we are still seeking to estimate the response but our goal is not
-necessarily to make predictions for future responses. Inferential models
-help us understand the connection between responses and the associated
-predictors, which can help us answer questions such as: *Which
-predictors are associated with the response?*, and *What is the
-relationship between the response and each predictor?* ("An Introduction
-to Statistical Learning" Textbook)
+**Inferential models:** For inferential models, we seek to understand the association between the response and the predictors. In this model, we are still seeking to estimate the response but our goal is not necessarily to make predictions for future responses. Inferential models help us understand the connection between responses and the associated predictors, which can help us answer questions such as: *Which predictors are associated with the response?*, and *What is the relationship between the response and each predictor?* ("An Introduction to Statistical Learning" Textbook)
 
-**Predictive models:** For predictive models in machine learning, the
-aim of the model is to accurately forecast future responses for a set of
-predictors. Practically, there are many situations where a set of inputs
-are readily available, but the output cannot be obtained, and thus needs
-to be predicted. The aim of this model is to have the lowest coefficient
-of determination, while maintaining accurate forecasts.
+**Predictive models:** For predictive models in machine learning, the aim of the model is to accurately forecast future responses for a set of predictors. Practically, there are many situations where a set of inputs are readily available, but the output cannot be obtained, and thus needs to be predicted. The aim of this model is to have the lowest coefficient of determination, while maintaining accurate forecasts.
 
 ### Question 5
 
-**Mechanistic:** A mechanistic model predicts the future based off of theory.
-In other words, they use theoretical ideas and/or values to make predictions
-about the future
+***Part 1***
 
-**Empirical:** An emperical model predicts the future by using past actualized
-values. Additionally, they make predictions by experimenting.
+**Mechanistic:** A mechanistic model predicts the future based off of theory. In other words, they use theoretical ideas and/or values to make predictions about the future. In short, mechanistic models use thoeries to predict the real world.
 
-These models differ by the method they use in order to reach the end goal. Empirical
-modeling is more of a "trial and error" method of modeling than mechanistic.
-The goal of mechanistic modeling is to use theoretical values to perfectly predict
-the future, whereas empirical modeling will help you predict something completely new.
+**Empirical:** An emperical model predicts the future by using past actualized values. Additionally, they make predictions by experimenting. In short, empirical models use real world results to develop theories.
 
-The similarities in both of these models is the end goal; both of these models
-seek to predict future outcomes and / or values.
+These models differ by the method they use in order to reach the end goal. Empirical modeling is more of a "trial and error" method of modeling than mechanistic. The goal of mechanistic modeling is to use theoretical values to perfectly predict the future, whereas empirical modeling will help you predict something completely new.
 
-https://smallbusiness.chron.com/linear-regression-forecasting-method-companies-73112.html
+The similarities in both of these models is the end goal; both of these models seek to predict future outcomes and / or values.
+
+Source:
+<https://smallbusiness.chron.com/linear-regression-forecasting-method-companies-73112.html>
+
+***Part 2***
+
+I would say that empirical models are generally easier to understandbecause of the fact that they analyze real world events to generate rules or theories. The reason I would say this is easier is because often it is easier to follow the logic of seeing events happen, then making a rule based off of the observation, compared to the other way around, which would be a more mechanistic approach.
+
+***Part 3***
+
+Bias-variance trade-off is related to mechanistic and empirical models because generally, empirical models will have a lower bias, leading to a larger variance since the models are built on real world observations though many trials. This will lead to a closer fit of the prediction to the previous points, but a larger variance for future observations. On the contrary, mechanistic models will be a lot more loose fitting since they are built on theory, meaning that their variance will be lower but they might have a much higher bias.
+
+### Question 6
+
+The first question is predictive. As we had discussed in previous questions, predictive modeling seeks to take in all of the variables of a certain observation in order to mathematically predict the response variable. In our question, we will use many different variables (voters data) to predict the likelihood they have of voting for a particular candidate.
+
+The second question is inferential. The reason this question is inferential is because the quantity we are trying to find isn't necessarily a prediction, but we are are trying to figure out the relationship between the variable and the response. In other words, we are trying to figure out how much of an effect the predictor had on the response.
+
+## Exploratory Data Analysis
+```{R, message = FALSE}
+# Loading Libraries
+library(tidyverse)
+library(corrplot)
+```
+
+### Exercise 1
+```{R}
+# Generating Histogram
+chart <- ggplot(data = mpg, aes(x = hwy)) + geom_histogram(binwidth = 2, color = "black", fill = "blue")
+chart
+```
+
+After plotting the histogram, it is evident that there is a clear bimodal distribution with one peak around 15mpg and another peak at around 25mpg. Additionally, there are some outliers with an exceptionally high hwy mpg. Another imporant item to note would be that the peak at around 25mpg has a higher count than the peak at 15 mpg.
 
 
+### Exercise 2
+```{R}
+# Generating Scatterplot hwy vs. cty
+chart <- ggplot(data = mpg, aes(x = hwy, y = cty)) + geom_point()
+chart
+```
 
+According to the scatterplot of highway mpg vs city mpg, it is clear to see that there is a visual relationship between the two. Generally, as highway mpg increases, so does city mpg, with highway mpg generally having a higher value than city mpg. There is also a decent amount of variance within the same highway mpg: looking at 25mpg highway, we can see that the city mpg varies from 15-20mpg.
+
+### Exercise 3
+```{R}
+# Generating Boxplot
+chart <- ggplot(data = mpg, aes(y = fct_infreq(manufacturer))) + geom_bar(color = "black", fill = "blue")
+chart
+
+# The fct_infreq() function I used was found on the documentation for bar charts on the tidyverse / ggplot2 website
+```
+
+According to the bar chart, lincoln produced the fewest cars in the data set, while dodge produced the most.
+
+### Exercise 4
+```{R}
+# Generating Boxplots for hwy grouped by cyl
+chart <- ggplot(data = mpg, aes(x = cyl, y = hwy, group = cyl)) + geom_boxplot(color = "blue")
+chart
+```
+
+There does seem to be a pattern in the data, generally the more cylinders an engine has, the lower the highway mpg seems to be. This correlation can be seen by comparing the means of hwy mpg.
+
+### Exercise 5
+```{R}
+# Generating the lower triangle correlation matrix with numbers
+
+# Removing non-numeric variables as errors are generated when trying to find the coefficient of correlation for character variables
+mpgSubset = subset(mpg,select = - c(manufacturer, model, trans, drv, fl, class))
+
+M <- cor(mpgSubset)
+corrplot(M, method = "number", type = "lower", diag = FALSE)
+```
+
+The variables that are negatively correlated with eachother are (city vs. displacement), (highway mpg vs displacement), (city mpg vs cylinders), (highway mpg vs cylinders), and (city mpg vs year)
+
+The variables that are positively correlated are (city mpg vs displacement), (year vs displacement), (year vs cylinders), (year vs highway mpg), and (city mpg vs highway mpg).
+
+One correlation that did not surprise me is city mpg vs highway mpg. One would assume that they would almost have a 1:1 correlation with eachother since a car with bad city mpg, generally probably has a bad highway mpg vice-verse.
+
+One correlation that I was very surprised by was year vs city and highway mpg. I thought for sure that we have made great steps in mpg over the years and you would see a strong positive correlation. According to this dataset though, this is not true.
