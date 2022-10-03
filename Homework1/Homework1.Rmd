@@ -101,3 +101,25 @@ predictors. Practically, there are many situations where a set of inputs
 are readily available, but the output cannot be obtained, and thus needs
 to be predicted. The aim of this model is to have the lowest coefficient
 of determination, while maintaining accurate forecasts.
+
+### Question 5
+
+**Mechanistic:** A mechanistic model predicts the future based off of theory.
+In other words, they use theoretical ideas and/or values to make predictions
+about the future
+
+**Empirical:** An emperical model predicts the future by using past actualized
+values. Additionally, they make predictions by experimenting.
+
+These models differ by the method they use in order to reach the end goal. Empirical
+modeling is more of a "trial and error" method of modeling than mechanistic.
+The goal of mechanistic modeling is to use theoretical values to perfectly predict
+the future, whereas empirical modeling will help you predict something completely new.
+
+The similarities in both of these models is the end goal; both of these models
+seek to predict future outcomes and / or values.
+
+https://smallbusiness.chron.com/linear-regression-forecasting-method-companies-73112.html
+
+
+
