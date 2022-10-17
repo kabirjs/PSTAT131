@@ -1,0 +1,144 @@
+---
+title: "Homework 2 - PSTAT131"
+author: "Kabir Snell 1161304"
+output:
+  html_document:
+    toc: yes
+    toc_float: yes
+    code_folding: show
+  pdf_document:
+    toc: yes
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+## Linear Regression
+
+```{R, message = FALSE}
+library(tidyverse)
+library(tidymodels)
+library(fitdistrplus)
+library(yardstick)
+```
+
+```{R}
+# Reading in the data
+abData <- read_csv("data/abalone.csv", show_col_types = FALSE)
+```
+
+## Question 1
+```{R}
+abData$age <- abData$rings + 1.5
+
+ggplot(data = abData, aes(x = age)) + geom_histogram(binwidth = 1)
+
+# Test for normality
+shapiro.test(abData$age)
+```
+
+At first glance, this variable seems to follow a normal distribution, but may be slightly sqewed to one side. After performing the shapiro-wilk normality test, we can confidently say that this distribution does not follow a normal distribution. The data seems to follow a **Gamma distribution**.
+
+```{R}
+descdist(abData$age, boot=1000)
+```
+Doing some further exploration on the distribution of age, this visualization tool that I found on the internet (https://cran.r-project.org/web/packages/fitdistrplus/index.html) seems to suggest that the distribution of age follows a lognormal distribution, rather than a gamma distribution. I am not familiar with the lognormal distribution, but some digging of the documentation seems to suggest that our data could fall into lognormal or gamma. 
+
+## Question 2
+```{R}
+set.seed(0727)
+
+abData_split <- initial_split(abData, prop = .8, strata = age)
+abData_train <- training(abData_split)
+abData_test <- training(abData_split)
+
+abData_split
+```
+## Question 3
+
+```{R}
+# Creating a recipe for the training data, omitting number of rings, creating dummy variables for nominal predictors, creating three interactions, centering the predictors, and scaling the predictors 
+ab_recipe <- recipe(age ~ type + longest_shell + diameter + height + whole_weight + shucked_weight + viscera_weight + shell_weight, data = abData_train) %>% 
+  step_dummy_multi_choice(type) %>%
+  prep() %>%
+  step_interact(terms = ~ type_F:type_I:type_M:shucked_weight + 
+                          longest_shell:diameter +
+                          shucked_weight:shell_weight) %>%
+  step_center(all_predictors()) %>%
+  step_scale(all_predictors())
+
+ab_recipe$term_info
+```
+In the recipe, we ommited rings from being a predictor of age. We have done this for two reasons. The first being that the goal of the project is to predict an abalone's age without opening the abalone: because you must open the abalone to count the rings, this would not be suitable for our project. Secondly, we already know a defined interaction between rings and age (age = rings + 1.5), this would then become **a perfect** predictor in our regression model, since the age column was calculated using the rings column, rendering the rest of our analysis useless.
+
+## Question 4
+```{R}
+# Creating and storing a linear regression model
+lm_model <- linear_reg() %>% 
+  set_engine("lm")
+```
+
+## Question 5
+```{R}
+# Creating a workflow
+lm_wflow <- workflow() %>% 
+  add_model(lm_model) %>% 
+  add_recipe(ab_recipe)
+```
+
+## Question 6
+```{R, warning = FALSE}
+# Fitting the regression model
+lm_fit <- fit(lm_wflow, abData_train)
+
+# Creating a data frame of new values
+newValues <- data.frame(type = 'F', longest_shell = .5, diameter = .1, height = .3, whole_weight = 4, shucked_weight = 1, viscera_weight = 2, shell_weight = 1)
+
+# Here is the prediction using the new data
+predict(lm_fit, new_data = newValues)
+```
+
+## Question 7
+```{R, warning = FALSE}
+ab_train_results <- predict(lm_fit, new_data = abData_train %>% dplyr::select(-age))
+
+ab_train_results <- bind_cols(ab_train_results, abData_train %>% dplyr::select(age))
+
+ab_train_results
+
+ab_metrics <- metric_set(rsq, rmse, mae)
+
+ab_metrics(ab_train_results, truth = age, estimate = .pred)
+```
+The R squared value, or coefficient of correlation, has determined that the predictors in the data set only account for 55% of the change in the outcome or (age). Typically, for an R squared result to be significant, you would usually look for an R squared of .8 or higher, depending on the context. Interpreting our results, it is safe to say that although our variables have an effect on the outcome, they are not very accurate predictors as they only account for 55% of the variation in the result.
+
+## Cool Graph
+```{R}
+ab_train_results %>% 
+  ggplot(aes(x = .pred, y = age)) +
+  geom_point(alpha = 0.2) +
+  geom_abline(lty = 2) + 
+  theme_bw() +
+  coord_obs_pred()
+```
+
+Some other things to note are that there is a large variation around the prediction for all values of age, but the variation certainly increases as age increases. Our model did a very bad job with predictions ~15, as most of the observed outcomes were much higher.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
