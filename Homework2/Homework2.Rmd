@@ -123,22 +123,3 @@ ab_train_results %>%
 ```
 
 Some other things to note are that there is a large variation around the prediction for all values of age, but the variation certainly increases as age increases. Our model did a very bad job with predictions ~15, as most of the observed outcomes were much higher.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
