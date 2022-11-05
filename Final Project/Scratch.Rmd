@@ -1,0 +1,153 @@
+---
+title: "Scratch Work"
+author: "Kabir Snell"
+date: "2022-10-03"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{R message=FALSE}
+library(tidyverse)
+library(tidymodels)
+library(spotifyr)
+library(randomForest)
+library(alr4)
+library(caret)
+```
+
+## Loading the data set
+```{R}
+album <- read_csv("Data/albums.csv", show_col_types = FALSE)
+
+#album <- dplyr::select(album, -c(project_art))
+
+album <- album %>% drop_na(spotify_id)
+
+album <- album %>% distinct(spotify_id, .keep_all = TRUE)
+
+album
+
+tracks <- read_csv("Data/tracks.csv", show_col_types = FALSE)
+
+tracks <- tracks %>% drop_na(album_id)
+```
+
+# Spotify Stuff
+```{R}
+Sys.setenv(SPOTIFY_CLIENT_ID = 'c9acfaab5e9d42f89b8c725f19c9c388')
+Sys.setenv(SPOTIFY_CLIENT_SECRET = '991a92865bbc4a2898111c6332d29d38')
+
+access_token <- get_spotify_access_token()
+```
+
+```{R}
+select(filter(tracks, album_id == "20r762YmB5HeofjMCiPMLv"), acousticness)
+x <- mean(select(filter(tracks, album_id == "20r762YmB5HeofjMCiPMLv"), acousticness)$acousticness)
+```
+
+```{R}
+for(i in album$spotify_id)
+{
+  print(i)
+}
+```
+
+```{R message = FALSE}
+for(i in 1:2421)
+{
+  album$acousticness[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), acousticness)$acousticness)
+  album$danceability[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), danceability)$danceability)
+  album$energy[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), energy)$energy)
+  album$instrumentalness[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), instrumentalness)$instrumentalness)
+  album$liveness[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), liveness)$liveness)
+  album$loudness[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), loudness)$loudness)
+  album$speechiness[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), speechiness)$speechiness)
+  album$valence[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), valence)$valence)
+  album$tempo[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), tempo)$tempo)
+}
+```
+
+```{R}
+for(i in 1:2997)
+{
+  album$explicit[i] <- mean(select(filter(tracks, album_id == album$spotify_id[i]), explicit)$explicit)
+}
+```
+```{R}
+write_csv(album, 'Data/albums.csv', col_names = TRUE)
+```
+
+```{R}
+set.seed(727)
+
+album$rating <- as.factor(album$rating)
+
+albumSplit <- initial_split(album, prop = .85, strata = rating)
+albumTrain <- training(albumSplit)
+albumTest <- testing(albumSplit)
+
+albumSplit
+```
+```{R}
+albumTrain$rating <- as.factor(albumTrain$rating)
+```
+
+
+```{R}
+rf_out <- randomForest(rating ~ tracks + year + acousticness + danceability + energy + instrumentalness + liveness + loudness + speechiness + valence + tempo + explicit, data = albumTrain  , mtry = 1, ntree = 200, importance = T)
+```
+
+```{R}
+rf_out
+```
+
+```{R}
+albumResults <- predict(rf_out, new_data = albumTrain)
+albumResults <- bind_cols(albumResults, albumTrain %>% dplyr::select(rating))
+albumResults$rating <- as.factor(albumResults$rating)
+albumResults
+
+albumResults2 <- predict(rf_out, newdata = albumTest)
+albumResults2 <- bind_cols(albumResults2, albumTest %>% dplyr::select(rating))
+albumResults2$rating <- as.factor(albumResults2$rating)
+albumResults2
+```
+```{R}
+cm <- confusionMatrix(albumResults$...1, albumResults$rating, dnn = c("Reference", "Prediction"))
+
+plt <- as.data.frame(cm$table)
+plt$Prediction <- factor(plt$Prediction, levels=rev(levels(plt$Prediction)))
+
+ggplot(plt, aes(Prediction,Reference, fill= Freq)) +
+        geom_tile() + geom_text(aes(label=Freq)) +
+        scale_fill_gradient(low="white", high="#009194") +
+        labs(x = "Reference",y = "Prediction") +
+        scale_x_discrete(labels=c("9","8","7","6","5","4","3","2","1","0")) +
+        scale_y_discrete(labels=c("0","1","2","3","4","5","6","7","8","9"))
+```
+```{R}
+cm <- confusionMatrix(albumResults2$...1, albumResults2$rating, dnn = c("Reference", "Prediction"))
+
+plt <- as.data.frame(cm$table)
+plt$Prediction <- factor(plt$Prediction, levels=rev(levels(plt$Prediction)))
+
+ggplot(plt, aes(Prediction,Reference, fill= Freq)) +
+        geom_tile() + geom_text(aes(label=Freq)) +
+        scale_fill_gradient(low="white", high="#009194") +
+        labs(x = "Reference",y = "Prediction") +
+        scale_x_discrete(labels=c("9","8","7","6","5","4","3","2","1","0")) +
+        scale_y_discrete(labels=c("0","1","2","3","4","5","6","7","8","9"))
+```
+```{R}
+namesAlb <- predict(rf_out, new_data = albumTrain)
+namesAlb <- bind_cols(namesAlb, albumTrain %>% dplyr::select(project_name, artist, rating))
+```
+
+
+
+
+
+
+
+

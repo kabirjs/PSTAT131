@@ -1,0 +1,37 @@
+---
+title: "Data Memo"
+author: "Kabir Snell"
+date: "2022-10-03"
+output:
+  html_document:
+    df_print: paged
+---
+
+## Data Memo - Kabir Snell 1161304
+
+### Dataset overview
+
+The dataset I plan to use is titled "Anthony Fantano Album Reviews". Anthony Fantano is a controversial, yet popular youtuber who has done over two thousand album, single and ep reviews. The contents of this include the score of every data set that Anthony Fantano Album Reviews has reviewed along with the year, project type, number of tracks, artist, and spotify and youtube id.
+
+I found this dataset on Kaggle, and I plan to obtain it by downloading the dataset onto my computer and storing it in github. 
+
+Source: https://www.kaggle.com/datasets/fad657b8d7a40c00f91af9f929220db2f92f7fd95c6bba0a9c9ad483cd9a601a
+
+There are 2400 observations with 7 predictors on the Kaggle dataset, but I'm sure there are plenty more I could ascertain using the spotify API
+
+Most of the variables I will be working with will be numerical variables, but there will also be some categorical variables that are very important to the project such as genre of music.
+
+There is no missing data in the Kaggle dataset, but there may be in the spotify data.
+
+### Overview of research question
+The variable I am most interested in predicting is Anthony Fantanos review score. One question that I am very interested in answering is: If I wanted to get a high score by Anthony Fantano, what kind of song / album should I make? The response variable would be the album review score, which is given by Anthony Fantano on a scale of 1-10. At this point in time, I believe that the best approach to answering these questions would be a classification approach.
+
+The predictors I think will be especially useful is the number of plays on Spotify and the genre of music. Anthony Fantano has a tendency to like music that is "underground", and has low plays. He also has a tendency to rate pop music lower than others.
+
+The goal of my model is mainly predictive with some inferential aspects. The overarching goal is to predict album scores, but I would like to know what the greatest contributes are to those album scores.
+
+### Proposed Timeline
+I plan to have my dataset loaded ASAP, with EDA beginning as soon as I have all of the relevant data I need. I will begin the models as soon as we learn a model in class that I believe I can apply to the project, since I do not have the skills to perform classification regression at the moment.
+
+### Concerns
+The only concern I have at the moment is getting the spotify data (I have no idea how to do that), and adding it to my dataset. Obviously, if I did this one entry at a time it would take a very long time, so I will need to somehow automate this process.
