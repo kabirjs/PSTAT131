@@ -1,0 +1,203 @@
+---
+title: "Homework 3 - PSTAT131"
+author: "Kabir Snell 6342786"
+output:
+  pdf_document:
+    toc: yes
+  html_document:
+    toc: yes
+    toc_float: yes
+    code_folding: show
+editor_options:
+  markdown:
+    wrap: 72
+---
+```{R message=FALSE}
+library(tidyverse)
+library(tidymodels)
+library(ggcorrplot)
+library(parsnip)
+library(discrim)
+```
+
+## Preproccessing
+```{R}
+# Reading in the data
+titanic <- read.csv("data/titanic.csv")
+
+# Changing survived, pclass and embarked to factors
+titanic$survived <- as.factor(titanic$survived)
+titanic$pclass <- as.factor(titanic$pclass)
+titanic$embarked <- as.factor(titanic$embarked)
+titanic$sex <- as.factor(titanic$sex)
+
+set.seed(727)
+```
+
+## Question 1
+```{R}
+# Splitting the data
+titanic_split <- initial_split(titanic, prop = .80, strata = survived)
+titanic_train <- training(titanic_split)
+titanic_test <- testing(titanic_split)
+
+titanic_split
+```
+
+The training data set has 712 observations and the testing data set has 179 observations.
+
+As for missing values, many cabin numbers are missing. Additionally, some of the ages of the passengers are also missing.
+
+Stratified sampling is a good idea for this sample because it captures key population characteristics in the sample. This is similar to a weighted average, as this method of sampling produces characteristics in the sample that are proportional to the overall population
+
+## Question 2
+```{R}
+titanic_train %>%
+  ggplot(aes(x=survived)) +
+  geom_bar()
+```
+
+The majority of passengers did not survive. The ratio of passengers who did not survive compared to those who did survive is a little bit less than 2:1
+
+## Question 3
+```{R}
+corr <- titanic_train %>%
+        drop_na() %>%
+        select(where(is.numeric)) %>%
+        correlations()
+
+ggcorrplot(corr, hc.order = TRUE, type="lower", lab=TRUE)
+```
+
+The two most correlated variables are {fare, parch}, and {fare, sib_sp}. This would follow intuitive thinking as you would expect fare to increase with the number of passengers on board. Age also was negatively correlated with parch, which makes sense as you would expect younger children to have more parents with them on board. This could be useful for rows with missing age values as it could give us some sort of indication of general age value.
+
+## Question 4
+```{R}
+# Creating a recipe
+titanic_recipe <- recipe(survived ~ pclass + sex + age + sib_sp + parch + fare, data = titanic_train) %>%
+  step_impute_linear(age) %>%
+  step_dummy(all_nominal_predictors()) %>%
+  prep() %>%
+  step_interact(~ age:fare) %>%
+  step_interact(~ sex_male:fare)
+
+titanic_recipe$term_info
+```
+
+## Question 5
+```{R}
+# Linear Regression Model
+log_mod <- logistic_reg() %>%
+  set_engine("glm") %>%
+  set_mode("classification")
+
+log_wflow <- workflow() %>%
+  add_model(log_mod) %>%
+  add_recipe(titanic_recipe)
+
+log_fit <- fit(log_wflow, titanic_train)
+```
+
+
+## Question 6
+```{R}
+# LDA Model
+lda_mod <- discrim_linear() %>%
+  set_mode("classification") %>%
+  set_engine("MASS")
+
+lda_wflow <- workflow() %>%
+  add_model(lda_mod) %>%
+  add_recipe(titanic_recipe)
+
+lda_fit <- fit(lda_wflow, titanic_train)
+```
+
+## Question 7
+```{R}
+# QDA Model
+qda_mod <- discrim_quad() %>%
+  set_mode("classification") %>%
+  set_engine("MASS")
+
+qda_wflow <- workflow() %>%
+  add_model(qda_mod) %>%
+  add_recipe(titanic_recipe)
+
+qda_fit <- fit(qda_wflow, titanic_train)
+```
+
+## Question 8
+```{R}
+# Naive Bayes model
+nba_mod <- naive_Bayes() %>%
+  set_mode("classification") %>%
+  set_engine("klaR") %>%
+  set_args(usekernel = FALSE)
+
+nba_wflow <- workflow() %>%
+  add_model(nba_mod) %>%
+  add_recipe(titanic_recipe)
+
+nba_fit <- fit(nba_wflow, titanic_train)
+```
+
+## Question 9
+```{R message=FALSE, warning=FALSE}
+# Fitting the models
+# Logistic Regression
+results <- bind_cols(titanic_train$survived ,c(predict(log_fit, titanic_train)))
+log_acc <- accuracy(results, truth = ...1, estimate = .pred_class)
+log_acc
+
+# LDA
+results <- bind_cols(titanic_train$survived ,c(predict(lda_fit, titanic_train)))
+lda_acc <- accuracy(results, truth = ...1, estimate = .pred_class)
+lda_acc
+
+# QDA
+results <- bind_cols(titanic_train$survived ,c(predict(qda_fit, titanic_train)))
+qda_acc <- accuracy(results, truth = ...1, estimate = .pred_class)
+qda_acc
+
+# Naive Bayes
+results <- bind_cols(titanic_train$survived ,c(predict(nba_fit, titanic_train)))
+nba_acc <- accuracy(results, truth = ...1, estimate = .pred_class)
+nba_acc
+```
+```{R}
+accuracyResults <- data.frame("Logistic" = log_acc$.estimate, "LDA" = lda_acc$.estimate,
+                              "QDA" = qda_acc$.estimate, "Bayes" = nba_acc$.estimate)
+accuracyResults
+```
+
+The logistic regression model achieved the highest accuracy on the training data
+
+## Question 10
+```{R}
+# Applying the logistic regression model to the test set
+results <- bind_cols(titanic_test$survived, c(predict(log_fit, titanic_test)))
+log_acc <- accuracy(results, truth = ...1, estimate = .pred_class)
+log_acc
+```
+
+The results show that the logistic regression model was ~83.799% accurate (surprisingly higher accuracy than it had on the training data)
+
+```{R}
+# Confusion Matrix
+augment(log_fit, new_data = titanic_test) %>%
+  conf_mat(truth = survived, estimate = .pred_class)
+```
+
+```{R}
+# ROC Curve
+augment(log_fit, new_data = titanic_test) %>%
+  roc_curve(survived, .pred_Yes) %>%
+  autoplot()
+```
+```{R}
+augment(log_fit, new_data = titanic_test) %>%
+  roc_auc(survived, .pred_Yes)
+```
+
+The testing and training accuracy metric did differ slightly. Surprisingly, the accuracy measurement on the testing data set was about 2% better than that of the training data set. One reason for this could just be luckiness with outliers in the testing and training data sets as I don't expect this result to repeat itself. 

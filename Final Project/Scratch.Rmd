@@ -14,6 +14,8 @@ library(spotifyr)
 library(randomForest)
 library(alr4)
 library(caret)
+library(keras)
+library(tensorflow)
 ```
 
 ## Loading the data set
@@ -143,8 +145,65 @@ ggplot(plt, aes(Prediction,Reference, fill= Freq)) +
 namesAlb <- predict(rf_out, new_data = albumTrain)
 namesAlb <- bind_cols(namesAlb, albumTrain %>% dplyr::select(project_name, artist, rating))
 ```
+```{R}
+x_train <- albumTrain %>%
+  select(-c(spotify_id, youtube_id, ...1, project_name, rating)) %>%
+  mutate(artist = as.factor(artist)) %>%
+  mutate(project_type = as.factor(project_type)) %>%
+  mutate(artist = as.numeric(artist)) %>%
+  mutate(project_type = as.numeric(project_type)) %>%
+  as.matrix()
+
+y_train <- albumTrain %>%
+  select(rating) %>%
+  as.matrix() %>%
+  to_categorical()
+
+x_test <- albumTest %>%
+  select(-c(spotify_id, youtube_id, ...1, project_name, rating, project_type, artist)) %>%
+  as.matrix()
+
+y_test <- albumTest %>%
+  select(rating) %>%
+  as.matrix() %>%
+  to_categorical()
+```
 
 
+```{r}
+model <- keras_model_sequential(input_shape = ncol(x_train)) %>%
+  layer_dense(50) %>%
+  layer_dense(20) %>%
+  layer_dense(10) %>%
+  layer_activation(activation = 'sigmoid')
+
+model %>%
+  compile(
+    loss = 'categorical_crossentropy',
+    optimizer = 'adam',
+    metrics = c('accuracy')
+  )
+```
+
+# Training model
+```{r}
+history <- model %>%
+  fit(x = x_train,
+      y = y_train,
+      epochs = 200,
+      validation_split = .1)
+```
+
+# Accuracy on training data
+```{r}
+summary(model)
+evaluate(model, x_train, y_train)
+```
+
+# Accuracy on testing data
+```{r}
+evaluate(model, x_test, y_test)
+```
 
 
 
