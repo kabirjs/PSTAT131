@@ -2,29 +2,140 @@
 title: "Homework 5"
 author: "Kabir Snell"
 date: "2022-11-27"
-output: html_document
+output:
+  pdf_document: default
+  html_document: default
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{R message=FALSE}
+# Loading Libraries
+library(tidymodels)
+library(ISLR)
+library(ISLR2)
+library(tidyverse)
+library(glmnet)
+library(janitor)
+
+tidymodels_prefer()
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{R}
+# Loading Data
+pokemon <- read.csv('data/Pokemon.csv')
 ```
 
-## Including Plots
-
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
+## Question 1
+```{R}
+pokemon <- pokemon %>%
+  clean_names()
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+The variable names for the data set became much more standardized. For example, Sp..Atk and Sp..Def became sp_atk and sp_def. Additionally, all of the first letters of the variable names became lowercase.
+
+## Question 2
+```{R}
+pokemon %>%
+ggplot(aes(x = type_1)) +
+geom_bar()
+```
+There are 18 Pokemon types in this data set, with flying having the fewest observations.
+
+```{R}
+pokemon <- pokemon %>% 
+  filter(type_1 =='Bug' | type_1 == 'Fire' | type_1 == 'Grass' | type_1 == 'Normal' | type_1 == 'Water' | type_1 == 'Psychic')
+
+pokemon$type_1 <- as.factor(pokemon$type_1)
+pokemon$legendary <- as.factor(pokemon$legendary)
+pokemon$generation <- as.factor(pokemon$generation)
+```
+
+## Question 3
+```{R}
+set.seed(727)
+
+pokemon_split <- initial_split(pokemon, prop = 0.80, strata = type_1)
+
+pokemon_train <- training(pokemon_split)
+pokemon_test <- testing(pokemon_split)
+
+pokemon_split
+```
+
+```{R}
+pokemon_fold <- vfold_cv(pokemon_train, v = 5)
+```
+Stratifying the folds may be useful as it offers a form of cross validation that we wouldn't otherwise have had.
+
+## Question 4
+```{R}
+pokemon_recipe <- recipe(type_1 ~ legendary + generation + sp_atk + attack + speed + defense + hp + sp_def, data = pokemon_train) %>%
+  step_dummy(legendary) %>%
+  step_dummy(generation) %>%
+  step_normalize(all_predictors())
+```
+
+## Question 5
+In total, we will be fitting 500 models
+```{R}
+pokemon_spec <- multinom_reg(mode = "classification",
+  engine = "glmnet",
+  penalty = tune(),
+  mixture = tune())
+
+pokemon_wkflow <- workflow() %>% 
+  add_recipe(pokemon_recipe) %>% 
+  add_model(pokemon_spec)
+
+pokemon_grid <- grid_regular(penalty(range = c(-5, 5)), mixture(range = c(0,1)), levels = 10)
+
+pokemon_grid
+```
+
+## Question 6
+```{R}
+tune_res <- tune_grid(
+  pokemon_wkflow, 
+  resamples = pokemon_fold, 
+  grid = pokemon_grid)
+
+autoplot(tune_res)
+```
+Generally smaller values of penalty produced better accuracy and roc_auc. For mixture, generally larger values prouced better results for accuracy and roc_auc. However, the peak values for penalty were slightly below the middle and the best value for mixture was .555555
+
+### Question 7
+```{R}
+best_penalty <- select_best(tune_res, metric = "roc_auc")
+
+pokemon_final <- finalize_workflow(pokemon_wkflow, best_penalty)
+
+pokemon_final_fit <- fit(pokemon_final, data = pokemon_train)
+
+augment(pokemon_final_fit, new_data = pokemon_test) %>%
+  roc_curve(truth = type_1, estimate = c(.pred_Bug,.pred_Fire, .pred_Grass, .pred_Normal, .pred_Psychic, .pred_Water))
+```
+
+### Question 8
+```{R}
+augment(pokemon_final_fit, new_data = pokemon_test) %>%
+roc_auc(truth = type_1, estimate = c(.pred_Bug,.pred_Fire, .pred_Grass, .pred_Normal, .pred_Psychic, .pred_Water))
+```
+```{R}
+augment(pokemon_final_fit, new_data = pokemon_test) %>%
+  roc_curve(truth = type_1, estimate = c(.pred_Bug,.pred_Fire, .pred_Grass, .pred_Normal, .pred_Psychic, .pred_Water)) %>%
+  autoplot()
+```
+```{R}
+augment(pokemon_final_fit, new_data = pokemon_test) %>%
+  conf_mat(truth = type_1, estimate = .pred_class) %>%
+  autoplot(type = "heatmap")
+```
+The model did well for some pokemon types while it did pretty bad for others. It was able to predict normal, psychic and bug pokemon pretty well, but struggled heavily with grass and fire.
+
+One idea as to that might be is that normal type pokemon generally have specific characteristics such as being physical attackers (high attack and low sp_atk), as well as being generally defensive. Just looking at the numbers it may be easy to discern normal type pokemon from the rest. Although all pokemon have tendencies for stats, it may be harder to categorize groups of pokemon by looking at the stats.
+
+Normal, bug and psychic pokemon are unique in their attributes, making it easy to categorize them, while the other types of pokemon are more vague. 
+
+
+
+
+
