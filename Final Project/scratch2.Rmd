@@ -1,0 +1,132 @@
+```{R message = FALSE}
+library(tidyverse)
+library(tidymodels)
+library(ISLR)
+library(rpart.plot)
+library(vip)
+library(janitor)
+library(randomForest)
+library(xgboost)
+library(ranger)
+library(corrplot)
+```
+
+```{R}
+# (From Previous Homework)
+# pokemon <- read.csv('Data/Pokemon.csv')
+
+# pokemon <- pokemon %>%
+#  clean_names()
+
+#pokemon <- pokemon %>% 
+#  filter(type_1 =='Bug' | type_1 == 'Fire' | type_1 == 'Grass' | type_1 == 'Normal' | type_1 == 'Water' | type_1 == #'Psychic')
+
+album$project_type <- as.factor(album$project_type)
+albumTrain$project_type <- as.factor(albumTrain$project_type)
+albumTest$project_type <- as.factor(albumTest$project_type)
+
+album$artist <- as.factor(album$artist)
+albumTrain$artist <- as.factor(albumTrain$artist)
+albumTest$artist <- as.factor(albumTest$artist)
+
+album_fold <- vfold_cv(albumTrain, v = 5, strata = rating)
+
+album_recipe <- recipe(rating ~ project_type + tracks + year + acousticness + danceability + energy + instrumentalness
+                       + liveness + loudness + speechiness + valence + tempo + explicit + artist, data = albumTrain) %>%
+  step_dummy(project_type) %>%
+  step_dummy(artist) %>%
+  step_normalize(all_predictors())
+```
+
+```{R}
+rf_spec <- rand_forest(mtry = tune(), trees = tune(), min_n = tune()) %>% 
+  set_engine("ranger", importance = "impurity") %>% 
+  set_mode("classification")
+
+rf_workflow <- workflow() %>% 
+  add_recipe(album_recipe) %>% 
+  add_model(rf_spec)
+
+rf_parameter_grid <- grid_regular(mtry(range = c(1, 8)), trees(range = c(200,1000)), min_n(range = c(1,10)), levels = 10)
+```
+
+```{R, eval = FALSE}
+rf_tune_res <- tune_grid(
+  rf_workflow,
+  resamples = album_fold,
+  grid = rf_parameter_grid,
+  metrics = metric_set(roc_auc)
+)
+
+write_rds(rf_tune_res, file = "brfAlbum.rds")
+```
+
+
+
+```{R}
+boosted_spec <- boost_tree(trees = tune()) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+boosted_workflow <- workflow() %>% 
+  add_recipe(album_recipe) %>% 
+  add_model(boosted_spec)
+
+boosted_grid <- grid_regular(trees(range = c(10, 2000)), levels = 10)
+```
+
+
+```{R}
+boosted_tune_res <- tune_grid(
+  boosted_workflow,
+  resamples = album_fold,
+  grid = boosted_grid,
+  metrics = metric_set(roc_auc)
+)
+
+autoplot(boosted_tune_res)
+```
+```{r}
+boosted_best_roc_auc <- boosted_tune_res %>% 
+  collect_metrics() %>% 
+  arrange(desc(mean)) %>% 
+  head(1)
+
+boosted_best_roc_auc
+```
+```{R}
+best_rf_final <- select_best(boosted_tune_res)
+
+rf_final_workflow_testing <- finalize_workflow(boosted_workflow, best_rf_final)
+
+rf_final_fit_testing <- fit(rf_final_workflow_testing, data = albumTrain)
+```
+
+```{R}
+final_tibble <- augment(rf_final_fit_testing, new_data = albumTest)
+final_tibble %>% 
+  roc_auc(truth = rating, estimate = .pred_0:.pred_9)
+```
+```{r}
+all_roc_curves <- final_tibble %>% 
+  roc_curve(truth = rating, estimate = .pred_0:.pred_9) %>% 
+  autoplot()
+all_roc_curves
+```
+```{r}
+confusion_matrix <- final_tibble %>%
+  conf_mat(rating, .pred_class) %>% 
+  autoplot(type = "heatmap")
+confusion_matrix
+```
+
+
+
+
+
+
+
+
+
+
+

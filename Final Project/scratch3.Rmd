@@ -1,0 +1,105 @@
+---
+title: "scratch3"
+author: "Kabir Snell"
+date: "2022-11-30"
+output: html_document
+---
+
+```{R}
+genre <- read.csv('Data/music_genre.csv')
+
+genre <- drop_na(genre)
+
+genre <- genre %>%
+  filter(duration_ms != -1) %>%
+  filter(tempo != '?')
+
+genre$music_genre <- as.factor(genre$music_genre)
+genre$key <- as.factor(genre$key)
+genre$mode <- as.factor(genre$mode)
+genre$tempo <- as.numeric(genre$tempo)
+```
+
+```{R}
+set.seed(727)
+
+genre_split <- initial_split(genre, prop = 0.80)
+
+genre_train <- training(genre_split)
+genre_test <- testing(genre_split)
+```
+
+```{R}
+genre_fold <- vfold_cv(genre_train, v = 2, strata = music_genre)
+
+genre_recipe <- recipe(music_genre ~ popularity + acousticness + danceability + duration_ms + energy + instrumentalness
+                       + liveness + loudness + mode + speechiness + tempo + key, data = genre_train) %>%
+  step_dummy(mode) %>%
+  step_dummy(key) %>%
+  step_normalize(all_predictors())
+```
+
+```{R}
+boosted_spec <- boost_tree(trees = tune()) %>%
+  set_engine("xgboost") %>%
+  set_mode("classification")
+
+boosted_workflow <- workflow() %>% 
+  add_recipe(genre_recipe) %>% 
+  add_model(boosted_spec)
+
+boosted_grid <- grid_regular(trees(range = c(10, 500)), levels = 3)
+```
+
+```{R eval=FALSE}
+boosted_tune_res <- tune_grid(
+  boosted_workflow,
+  resamples = genre_fold,
+  grid = boosted_grid,
+  metrics = metric_set(roc_auc)
+)
+
+write_rds(boosted_tune_res, file = "boosted.rds")
+```
+```{R}
+boosted_tune_res <- read_rds(file = "boosted.rds")
+
+autoplot(boosted_tune_res)
+```
+
+```{R}
+boosted_best_roc_auc <- boosted_tune_res %>% 
+  collect_metrics() %>% 
+  arrange(desc(mean)) %>% 
+  head(1)
+
+boosted_best_roc_auc
+```
+```{R}
+best_rf_final <- select_best(boosted_tune_res)
+
+rf_final_workflow_testing <- finalize_workflow(boosted_workflow, best_rf_final)
+
+rf_final_fit_testing <- fit(rf_final_workflow_testing, data = genre_train)
+
+final_tibble <- augment(rf_final_fit_testing, new_data = genre_test)
+
+final_tibble %>% 
+  roc_auc(truth = music_genre, estimate = .pred_Alternative:.pred_Rock)
+```
+```{R}
+all_roc_curves <- final_tibble %>% 
+  roc_curve(truth = music_genre, estimate = .pred_Alternative:.pred_Rock) %>% 
+  autoplot()
+all_roc_curves
+```
+
+
+
+
+
+
+
+
+
+
